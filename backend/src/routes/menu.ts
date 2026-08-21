@@ -48,9 +48,12 @@ router.get('/', async (_req, res: Response) => {
     });
 
     return res.json({ menuItems: formattedMenuItems });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Fetch menu error:', error);
-    return res.status(500).json({ error: 'Failed to fetch menu items' });
+    return res.status(500).json({ 
+      error: 'Failed to fetch menu items', 
+      details: error?.message || String(error) 
+    });
   }
 });
 
