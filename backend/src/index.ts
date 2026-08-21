@@ -12,6 +12,7 @@ import inventoryRoutes from './routes/inventory';
 import supplierRoutes from './routes/suppliers';
 import reportRoutes from './routes/reports';
 import { initSocket } from './socket';
+import { prisma } from './db';
 
 const app = express();
 const server = http.createServer(app);
@@ -117,6 +118,27 @@ app.get('/api/health', (_req, res) => {
     environment: process.env.NODE_ENV || 'development',
     time: new Date().toISOString(),
   });
+});
+
+app.get('/api/health/db', async (_req, res) => {
+  try {
+    const isUrlSet = !!process.env.DATABASE_URL;
+    const count = await prisma.menuItem.count();
+    res.json({
+      status: 'ok',
+      dbConnected: true,
+      menuItemCount: count,
+      databaseUrlSet: isUrlSet
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      dbConnected: false,
+      databaseUrlSet: !!process.env.DATABASE_URL,
+      errorName: error?.name,
+      errorMessage: error?.message || String(error)
+    });
+  }
 });
 
 // Custom JSON 404 Fallback (replaces default 'Cannot GET' plain text)
